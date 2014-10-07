@@ -1,0 +1,3 @@
+# Install in: /etc/udev/rules.d/
+
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/bin/fix_udev_gpio.sh"
