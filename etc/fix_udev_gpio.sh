@@ -10,16 +10,6 @@
 chown -R :gpio /sys/devices/virtual/gpio
 chown -R :gpio /sys/class/gpio
 
-# Additional code for getting AIN pins set up (should probably rename gpio group to bbbuser or some such XXX)
-ain_activator=/sys/devices/bone_capemgr.*
-chown -R :gpio $ain_activator
-chmod 2775 :gpio $ain_activator
-# XXX - Go ahead and init ain, since why not...; probably should force manual init...
-if [ ! -a $ain_activator/slots ]
-then
-  echo cape-bone-iio > $ain_activator/slots
-fi
-
 find /sys/devices/virtual/gpio -type d -exec chmod 2775 {} \;
 find /sys/devices/virtual/gpio -name "direction" -exec chmod 0660 {} \;
 find /sys/devices/virtual/gpio -name "edge" -exec chmod 0660 {} \;
@@ -32,4 +22,14 @@ find /sys/devices/virtual/gpio -name "uevent" -exec chmod 0660 {} \;
 find /sys/devices/virtual/gpio -name "autosuspend_delay_ms" -exec chmod 0660 {} \;
 find /sys/devices/virtual/gpio -name "control" -exec chmod 0660 {} \;
 
+# Additional code for getting AIN pins set up (should probably rename gpio group to bbbuser or some such XXX)
+ain_activator=/sys/devices/bone_capemgr.*
+chown -R :gpio $ain_activator/
+chmod 2775 $ain_activator/
+# XXX - Go ahead and init ain, since why not...; probably should force manual init...
+if [ ! -f $ain_activator/slots ]
+then
+  echo "Activating ain"
+  echo cape-bone-iio > $ain_activator/slots
+fi
 
