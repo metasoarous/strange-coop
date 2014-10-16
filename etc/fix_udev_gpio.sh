@@ -25,11 +25,7 @@ find /sys/devices/virtual/gpio -name "control" -exec chmod 0660 {} \;
 # Additional code for getting AIN pins set up (should probably rename gpio group to bbbuser or some such XXX)
 ain_activator=/sys/devices/bone_capemgr.*
 chown -R :gpio $ain_activator/
-chmod 2775 $ain_activator/
+chmod -R 2775 $ain_activator/
 # XXX - Go ahead and init ain, since why not...; probably should force manual init...
-if [ ! -f $ain_activator/slots ]
-then
-  echo "Activating ain"
-  echo cape-bone-iio > $ain_activator/slots
-fi
+echo cape-bone-iio > $ain_activator/slots
 
