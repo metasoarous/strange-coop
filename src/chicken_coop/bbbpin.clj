@@ -136,7 +136,7 @@
 (defmulti writes!
   "Write to multiple pins. If second arg is a collection, will write! nth item of second arg to nth pin in pins.
   If not a collection, second arg should be :on or :off"
-  #(coll? (second %)))
+  (fn [pins bit-or-bits] (coll? bit-or-bits)))
 
 (defmethod writes! true
   [pins bits]
