@@ -43,12 +43,12 @@
   (forward! [this]
     (with-sleeps (or (:ms-wait this) 20)
       (bb/write! power :off)
-      (bb/writes! [+pin -pin] :on)
+      (bb/writes! [+pin -pin] :off)
       (bb/write! power :on)))
   (reverse! [this]
     (with-sleeps (or (:ms-wait this) 20)
       (bb/write! power :off)
-      (bb/writes! [+pin -pin] :off)
+      (bb/writes! [+pin -pin] :on)
       (bb/write! power :on)))
   (stop! [_]
     (bb/write! power :off)))
@@ -59,12 +59,12 @@
   (forward! [this]
     (with-sleeps (or (:ms-wait this) 10)
       (bb/write! power :off)
-      (bb/write! pin :on)
+      (bb/write! pin :off)
       (bb/write! power :on)))
   (reverse! [this]
     (with-sleeps (or (:ms-wait this) 10)
       (bb/write! power :off)
-      (bb/writes! [pin power] :off)
+      (bb/write! pin :on)
       (bb/write! power :on)))
   (stop! [_]
     (bb/write! power :off)))
@@ -95,7 +95,7 @@
                    (let [[header pin] (if (coll? pin-spec)
                                         pin-spec
                                         [header pin-spec])]
-                     (bb/gpio header pin :on)))
+                     (bb/gpio header pin :out)))
                  pins))
         (assoc :ms-wait ms-wait))))
 
