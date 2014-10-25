@@ -71,15 +71,15 @@
 
 
 (defn -main []
-  (let [_ 33
-        floor-io (gpio _ _ _)
-        roof-io (gpio _ _ _)
-        light-ain (ain _)
-        hb (hb/hbridge [:P8 _] [:P8 _] [:P8 _] [:P8 _])
-        timer (time-sm
-                (init-state! floor-io roof-io light-ain)
-                (partial close-door! hb roof-io)
-                (partial open-door! hb roof-io))]
+  (let [floor-btn (gpio :P8 11 :in)
+        roof-btn  (gpio :P8 12 :in)
+        light-ain (ain 33)
+        temp-ain  (ain 35)
+        mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
+        timer     (time-sm
+                    (init-state! floor-io roof-io light-ain)
+                    (partial close-door! hb roof-io)
+                    (partial open-door! hb roof-io))]
     (loop [time-sm time-sm]
       (recur (trans-sm! timer (read! light-ain))))))
 
