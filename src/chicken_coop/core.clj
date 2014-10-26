@@ -31,8 +31,8 @@
 
 
 (defn time-sm [state day-fn! night-fn!]
-  (let [dusk 0.3
-        dawn 0.4]
+  (let [dusk 0.12
+        dawn 0.20]
     {:state state
      :trans
         {:day
@@ -58,12 +58,33 @@
     (((:trans sm) (:state sm)) m)))
 
 
+(defmacro try-times
+  [i message & body]
+  `(loop [i# ~i]
+     (let [result#
+             (when (> i# 0)
+               (try
+                 ~@body
+                 (catch Exception e#
+                   (println ~message ":" e#)
+                   ::failed)))]
+       (if (= result# ::failed)
+         (recur (dec i#))
+         result#))))
+
+
+(defn safe-read!
+  [a]
+  (try-times 50 "Failed to read pin"
+    (read! a)))
+
+
 (defn init-state!
   [floor-btn roof-btn light-ain]
   (cond
     (closed? floor-btn) :night
     (closed? roof-btn) :day
-    (> (read! light-ain) 0.35) :day
+    (> (safe-read! light-ain) 0.35) :day
     :else :night))
 
 
@@ -88,7 +109,7 @@
                                (mtr-ctrl x)))]
                (close! p))))
     (loop [time-sm time-sm]
-      (recur (trans-sm! timer (read! light-ain))))))
+      (recur (trans-sm! timer (safe-read! light-ain))))))
 
 
 (defn play []
@@ -102,8 +123,8 @@
     (println "initialized successfully")
     (doseq [_ (range)]
       (try
-        (println "Reading light" (read! a1))
-        (println "Reading temp" (read! a2))
+        (println "Reading light" (safe-read! a1))
+        (println "Reading temp" (safe-read! a2))
         (println "Reading btn" (read! g))
         (println "")
         (catch Exception e
