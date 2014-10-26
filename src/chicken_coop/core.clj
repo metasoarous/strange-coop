@@ -18,15 +18,15 @@
        (recur))))
 
 
-(defn close-door! [hb floor-io]
+(defn close-door! [hb floor-btn]
   (hb/forward! hb)
-  (wait-till (closed? floor-io)
+  (wait-till (closed? floor-btn)
     (hb/stop! hb)))
 
 
-(defn open-door! [hb roof-io]
+(defn open-door! [hb roof-btn]
   (hb/reverse! hb)
-  (wait-till (closed? roof-io)
+  (wait-till (closed? roof-btn)
     (hb/stop! hb)))
 
 
@@ -59,10 +59,10 @@
 
 
 (defn init-state!
-  [floor-io roof-io light-ain]
+  [floor-btn roof-btn light-ain]
   (cond
-    (closed? floor-io) :night
-    (closed? roof-io) :day
+    (closed? floor-btn) :night
+    (closed? roof-btn) :day
     (> (read! light-ain) 0.35) :day
     :else :night))
 
@@ -77,28 +77,38 @@
         temp-ain  (ain 35)
         mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
         timer     (time-sm
-                    (init-state! floor-io roof-io light-ain)
-                    (partial close-door! hb roof-io)
-                    (partial open-door! hb roof-io))]
+                    (init-state! floor-btn roof-btn light-ain)
+                    (partial close-door! mtr-ctrl roof-btn)
+                    (partial open-door! mtr-ctrl roof-btn))]
+    (setup-shutdown-hook!
+      (fn [] (doseq [p (concat
+                         [floor-btn
+                          roof-btn]
+                         (for [x [:power :-pin :+pin]]
+                               (mtr-ctrl x)))]
+               (close! p))))
     (loop [time-sm time-sm]
       (recur (trans-sm! timer (read! light-ain))))))
 
 
 (defn play []
   (println "ready to initialize")
-  (let [g (gpio :P8 11 :low)
-        a (ain 33)]
+  (let [g  (gpio :P8 11 :out)
+        a1 (ain 33)
+        a2 (ain 35)]
     (setup-shutdown-hook!
       (fn [] (close! g)))
     (println "Pin settings" ((pinout-spec*) [:P8 11]))
     (println "initialized successfully")
-    (doseq [_ (range 100)]
-      (println "Writing :on")
-      (write! g :on)
-      (Thread/sleep 1000)
-      (println "Writing :off")
-      (write! g :off)
-      (println "Reading ain:" (read! a))
+    (doseq [_ (range)]
+      (try
+        (println "Reading light" (read! a1))
+        (println "Reading temp" (read! a2))
+        (println "Reading btn" (read! g))
+        (println "")
+        (catch Exception e
+          (println "Had an exception")
+          (println e)))
       (Thread/sleep 1000))))
 
 
