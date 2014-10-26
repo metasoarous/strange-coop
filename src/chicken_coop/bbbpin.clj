@@ -121,10 +121,10 @@
 
 
 (defn on? [gp]
-  (= (:on (read! gp))))
+  (= :on (read! gp)))
 
 (defn off? [gp]
-  (= (:off (read! gp))))
+  (= :off (read! gp)))
 
 (defn on! [pin]
   (write! pin :on))
