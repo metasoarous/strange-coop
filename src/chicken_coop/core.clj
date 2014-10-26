@@ -93,7 +93,7 @@
 
 (defn play []
   (println "ready to initialize")
-  (let [g  (gpio :P8 11 :out)
+  (let [g  (gpio :P8 12 :in)
         a1 (ain 33)
         a2 (ain 35)]
     (setup-shutdown-hook!
