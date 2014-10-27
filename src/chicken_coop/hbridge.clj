@@ -50,8 +50,10 @@
       (bb/write! power :off)
       (bb/writes! [+pin -pin] :on)
       (bb/write! power :on)))
-  (stop! [_]
-    (bb/write! power :off)))
+  (stop! [this]
+    (with-sleeps (or (:ms-wait this) 20)
+      (bb/write! power :off)
+      (bb/writes! [+pin -pin] :off))))
 
 
 (defrecord HBridge2Pin [power pin]
@@ -66,8 +68,10 @@
       (bb/write! power :off)
       (bb/write! pin :on)
       (bb/write! power :on)))
-  (stop! [_]
-    (bb/write! power :off)))
+  (stop! [this]
+    (with-sleeps (or (:ms-wait this) 10)
+      (bb/write! power :off)
+      (bb/write! pin :off))))
 
 
 (defn hbridge
