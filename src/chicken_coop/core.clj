@@ -75,7 +75,6 @@
 
 
 (defn trans-sm! [sm m]
-  (log "Running trans-sm! on sm:" sm "with msg:" m)
   (assoc sm :state
     (((:trans sm) (:state sm)) m)))
 
