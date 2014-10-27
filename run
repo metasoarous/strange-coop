@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+lein trampoline run -m chicken-coop.core

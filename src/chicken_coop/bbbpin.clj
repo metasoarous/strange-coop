@@ -182,12 +182,12 @@
 (setup-shutdown-hook!
   (fn []
     (log "Running shutdown hook")
-    (doseq [p @active-pins]
+    (doseq [[k p] @active-pins]
       (try
-        (log "Closing pin:" p)
+        (log "Closing pin:" k)
         (close! p)
         (catch Exception e
-          (log "Problems closing pin")
+          (log "Problems closing pin" k)
           (.printStackTrace e))))))
 
 
