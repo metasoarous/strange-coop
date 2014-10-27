@@ -75,6 +75,9 @@
     (str)))
 
 
+(def active-pins (atom {}))
+
+
 ; XXX - I guess in all actuality, GPIO should only know about its fs-pin-n, which gets computed once in
 ; the gpio constructor and then used with the protocol implementations
 (defrecord GPIO [header pin direction]
@@ -93,11 +96,14 @@
         ; In case anything goes wrong with that, try to close the gpio
         (catch Exception e
           (close! this)
-          (throw e)))))
+          (throw e))))
+        ; Add pin to active pins list
+    (swap! active-pins #(assoc % [header pin] this)))
   (close! [_]
     (write-bytes
       (str "/sys/class/gpio/unexport")
-      (get-gpio-n header pin)))
+      (get-gpio-n header pin))
+    (swap! active-pins #(dissoc % [header pin])))
   WriteablePin
   (write! [_ value]
     {:pre [(#{:on :off} direction)]}
@@ -171,5 +177,17 @@
 
 (defn ain [pin]
   (AIN. pin))
+
+
+(setup-shutdown-hook!
+  (fn []
+    (log "Running shutdown hook")
+    (doseq [p @active-pins]
+      (try
+        (log "Closing pin:" p)
+        (close! p)
+        (catch Exception e
+          (log "Problems closing pin")
+          (.printStackTrace e))))))
 
 

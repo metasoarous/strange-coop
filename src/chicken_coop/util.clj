@@ -2,6 +2,17 @@
   (:require [clojure.data.csv :as csv]))
 
 
+(defn log
+  [& args]
+  (apply println "LOG" (int (/ (System/currentTimeMillis) 1000)) ":" args))
+
+
+(defn log-tr
+  [& args]
+  (log args)
+  (last args))
+
+
 (defn safe-int [x]
   (try
     (Integer/parseInt x)

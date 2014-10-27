@@ -7,15 +7,6 @@
             [chicken-coop.hbridge :as hb]))
 
 
-(defn log
-  [& args]
-  (apply println "LOG" (int (/ (System/currentTimeMillis) 1000)) ":" args))
-
-(defn log-tr
-  [& args]
-  (log args)
-  (last args))
-
 ; Helper functions so I can keep track of whether doors are closed or open
 ;(def closed? (comp (partial log-tr "Pin closed?:") off?))
 ;(def open? (comp (partial log-tr "Pin open?:") on?))
@@ -124,22 +115,6 @@
                     (log-tr "Initial time state:" (init-state! floor-btn roof-btn light-ain))
                     (partial open-door! mtr-ctrl roof-btn)
                     (partial close-door! mtr-ctrl floor-btn))]
-    (setup-shutdown-hook!
-      (fn []
-        (require '[clojure.tools.trace :as tr])
-        (log "Running shutdown hook")
-        (let [pins (concat
-                     [floor-btn
-                      roof-btn]
-                     (for [x [:power :-pin :+pin]]
-                           (mtr-ctrl x)))]
-          (try
-            (log "Pins to close:" pins)
-            (catch Exception e
-              (println "Pins can't be printed?")))
-          (doseq [p pins]
-            (log "Closing pin:" p)
-            (close! p)))))
     (loop [timer timer]
       (Thread/sleep 1000)
       (let [light-level (safe-read! light-ain)]
