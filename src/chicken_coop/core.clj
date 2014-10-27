@@ -1,16 +1,26 @@
 (ns chicken-coop.core
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
+            ;[clojure.tools.logging :as log]
             [clojure.tools.trace :as tr]
             [chicken-coop.util :refer :all]
             [chicken-coop.bbbpin :as bb :refer :all]
             [chicken-coop.hbridge :as hb]))
 
 
+(defn log
+  [& args]
+  (apply println "LOG" (int (/ (System/currentTimeMillis) 1000)) ":" args))
+
+(defn log-tr
+  [& args]
+  (log args)
+  (last args))
+
 ; Helper functions so I can keep track of whether doors are closed or open
-(defn read-logger [p] (log/info "Pin state is:" (read! p)) p)
-(def closed? (comp off? read-logger))
-(def open? (comp on? read-logger))
+;(def closed? (comp (partial log-tr "Pin closed?:") off?))
+;(def open? (comp (partial log-tr "Pin open?:") on?))
+(def closed? off?)
+(def open? on?)
 
 
 (defmacro wait-till [test & body]
@@ -22,18 +32,18 @@
 
 
 (defn close-door! [hb floor-btn]
-  (log/info "Closing door")
+  (log "Closing door")
   (hb/forward! hb)
   (wait-till (closed? floor-btn)
-    (log/info "Stopping door")
+    (log "Stopping door")
     (hb/stop! hb)))
 
 
 (defn open-door! [hb roof-btn]
-  (log/info "Opening door")
+  (log "Opening door")
   (hb/reverse! hb)
   (wait-till (closed? roof-btn)
-    (log/info "Stopping door")
+    (log "Stopping door")
     (hb/stop! hb)))
 
 
@@ -47,7 +57,7 @@
               (if (< brightness dusk)
                 ; state side effects
                 (do
-                  (log/info "Switching from day to night and running morning routine")
+                  (log "Switching from day to night and running evening routine")
                   (night-fn!)
                   :night)
                 ; Don't change anything
@@ -57,7 +67,7 @@
               (if (> brightness dawn)
                 ; state side effects
                 (do
-                  (log/info "Switching from night to day and running morning routine")
+                  (log "Switching from night to day and running morning routine")
                   (day-fn!)
                   :day)
                 ; Don't change anything
@@ -65,6 +75,7 @@
 
 
 (defn trans-sm! [sm m]
+  (log "Running trans-sm! on sm:" sm "with msg:" m)
   (assoc sm :state
     (((:trans sm) (:state sm)) m)))
 
@@ -77,7 +88,7 @@
                (try
                  ~@body
                  (catch Exception e#
-                   (log/error ~message ":" e#)
+                   (println ~message ":" e#)
                    ::failed)))]
        (if (= result# ::failed)
          (recur (dec i#))
@@ -92,7 +103,7 @@
 
 (defn init-state!
   [floor-btn roof-btn light-ain]
-  (log/info "Initializing state")
+  (log "Initializing state")
   (cond
     (closed? floor-btn) :night
     (closed? roof-btn) :day
@@ -104,30 +115,36 @@
 
 
 (defn -main []
-  (log/info "Initializing -main")
+  (log "Initializing -main")
   (let [floor-btn (gpio :P8 11 :in)
         roof-btn  (gpio :P8 12 :in)
         light-ain (ain 33)
         temp-ain  (ain 35)
         mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
         timer     (time-sm
-                    (init-state! floor-btn roof-btn light-ain)
-                    (partial close-door! mtr-ctrl floor-btn)
-                    (partial open-door! mtr-ctrl roof-btn))]
+                    (log-tr "Initial time state:" (init-state! floor-btn roof-btn light-ain))
+                    (partial open-door! mtr-ctrl roof-btn)
+                    (partial close-door! mtr-ctrl floor-btn))]
     (setup-shutdown-hook!
       (fn []
-        (log/info "Running shutdown hook")
-        (doseq [p (tr/trace :SHUTDOWN_PINS
-                    (concat
-                      [floor-btn
-                       roof-btn]
-                      (for [x [:power :-pin :+pin]]
-                            (mtr-ctrl x))))]
-          (close! p))))
-    (loop [time-sm time-sm]
+        (require '[clojure.tools.trace :as tr])
+        (log "Running shutdown hook")
+        (let [pins (concat
+                     [floor-btn
+                      roof-btn]
+                     (for [x [:power :-pin :+pin]]
+                           (mtr-ctrl x)))]
+          (try
+            (log "Pins to close:" pins)
+            (catch Exception e
+              (println "Pins can't be printed?")))
+          (doseq [p pins]
+            (log "Closing pin:" p)
+            (close! p)))))
+    (loop [timer timer]
       (Thread/sleep 1000)
       (let [light-level (safe-read! light-ain)]
-        (log/info "Current light-level:" light-level)
+        (log "Current light-level:" light-level)
         (recur (trans-sm! timer light-level))))))
 
 
