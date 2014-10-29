@@ -13,6 +13,9 @@ It requires a beaglebone black, and setup of a lein/clojure environment.
 * Sysfs based GPIO and AIN implementations, using shared interfaces for `ReadablePin`, etc.
 * Some abstraction code for working with H-bridges.
 * Automatic `close!`ing of GPIO pins on shutdown hook (requires running with `lein trampoline` however).
+* Specification of pin by physical header/pin pair (like `P8 11`) intead of sysfs pin #.
+  (Should probably factor this out a bit though, so the GPIO implementation only knows about the sysfs pin, and the constructor does the work of translation)
+
 
 ## Hardware
 
