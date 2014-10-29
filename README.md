@@ -6,6 +6,14 @@ I have four beautiful chickens, and have to wake up rather early every morning t
 This project is for an automatic, light sensor based automatic door shutter.
 It requires a beaglebone black, and setup of a lein/clojure environment.
 
+## Features
+
+* `./bin/fix_permissions.sh` - Sets up udev rules in `etc` such that the user has permissions to write to GPIO pins and read from AIN pins.
+  Also actives AIN functionality on boot, though I wonder if we shouldn't force users to do this themselves.
+* Sysfs based GPIO and AIN implementations, using shared interfaces for `ReadablePin`, etc.
+* Some abstraction code for working with H-bridges.
+* Automatic `close!`ing of GPIO pins on shutdown hook (requires running with `lein trampoline` however).
+
 ## Hardware
 
 On the hardware side, I'm using
@@ -34,6 +42,7 @@ TODO: Will be posting more information eventually on how to set up the physical 
 * What should go under `bonejure.core` versus other namespaces like `bonejure.gpio` or `bonejure.ain`?
 * Should we rewrite the gpio pin code to use the mode7 column for extra robustness?
 * Use future on init! so that we can init a whole bunch of pins at once and not have major lag.
+* Should probably move logic of header/pin to be beaglebone specific.
 
 ## License
 
