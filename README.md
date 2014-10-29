@@ -10,15 +10,16 @@ It requires a beaglebone black, and setup of a lein/clojure environment.
 
 On the hardware side, I'm using
 * an old 9V drill motor to raise/lower the door
-* 4 switches for an H-bridge circuit (or a prebuilt H-bridge circuit, as long as it supports the specs)
-* 2 buttons for measuring when the door is open/shut
-* photoresistor for sensing light
+* 3 relays (5V coil) for an H-bridge circuit (or a prebuilt H-bridge circuit, as long as it supports the specs)
+* 3 transistors for triggering the relays from the 3V GPIO output voltage (switches on the sys 5V power)
+* 2 buttons for detecting when the door is open/shut
+* photoresistor and resistor for sensing light
 * large, 6V battery
-* voltage regulator
-* 2 or 3 capacitors for voltage smoothing
+* Low dropout voltage regulator supporting 1.5A at 5V out
+* 2 capacitors for voltage smoothing
 
 Optionally (some in future)
-* thermocouple, for monitoring
+* thermocouple, for monitoring temperature
 * wifi, for notifications, etc
 * camera, for monitoring and viz to count chicken laying
 
@@ -33,7 +34,6 @@ TODO: Will be posting more information eventually on how to set up the physical 
 * What should go under `bonejure.core` versus other namespaces like `bonejure.gpio` or `bonejure.ain`?
 * Should we rewrite the gpio pin code to use the mode7 column for extra robustness?
 * Use future on init! so that we can init a whole bunch of pins at once and not have major lag.
-* wtf - https://github.com/dollfreaks/bonejure
 
 ## License
 
