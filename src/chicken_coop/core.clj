@@ -27,7 +27,7 @@
   (hb/forward! hb)
   (wait-till (closed? floor-btn)
     (log "Stopping door")
-    (Thread/sleep 100)
+    (Thread/sleep 500)
     (hb/stop! hb)))
 
 
