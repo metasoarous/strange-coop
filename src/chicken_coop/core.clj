@@ -144,18 +144,15 @@
 
 (defn play []
   (println "ready to initialize")
-  (let [g  (gpio :P8 12 :in)
+  (let [g  (button :P8 11 :normally-off)
         a1 (ain 33)
         a2 (ain 35)]
-    (setup-shutdown-hook!
-      (fn [] (close! g)))
-    (println "Pin settings" ((pinout-spec*) [:P8 11]))
     (println "initialized successfully")
     (doseq [_ (range)]
       (try
         (println "Reading light" (safe-read! a1))
         (println "Reading temp" (safe-read! a2))
-        (println "Reading btn" (read! g))
+        (println "Btn closed?" (closed? g))
         (println "")
         (catch Exception e
           (println "Had an exception")
