@@ -7,11 +7,30 @@
             [chicken-coop.hbridge :as hb]))
 
 
-; Helper functions so I can keep track of whether doors are closed or open
-;(def closed? (comp (partial log-tr "Pin closed?:") off?))
-;(def open? (comp (partial log-tr "Pin open?:") on?))
-(def closed? off?)
-(def open? on?)
+(defprotocol IButton
+  (open? [this])
+  (closed? [this]))
+
+(defrecord NormallyOnButton [gpio-pin]
+  IButton
+  (closed? [_]
+    (off? gpio-pin))
+  (open? [_]
+    (on? gpio-pin)))
+
+(defrecord NormallyOffButton [gpio-pin]
+  IButton
+  (closed? [_]
+    (on? gpio-pin))
+  (open? [_]
+    (off? gpio-pin)))
+
+(defn button [pin-header pin-n direction]
+  (assert (#{:normally-on :normally-off} direction))
+  (let [gpio-pin (gpio pin-header pin-n :in)]
+    (case direction
+      :normally-on (NormallyOnButton. gpio-pin)
+      :normally-off (NormallyOffButton. gpio-pin))))
 
 
 (defmacro wait-till [test & body]
@@ -107,8 +126,8 @@
 
 (defn -main []
   (log "Initializing -main")
-  (let [floor-btn (gpio :P8 11 :in)
-        roof-btn  (gpio :P8 12 :in)
+  (let [floor-btn (button :P8 11 :normally-off)
+        roof-btn  (button :P8 12 :normally-on)
         light-ain (ain 33)
         temp-ain  (ain 35)
         mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
