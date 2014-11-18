@@ -10,6 +10,7 @@ if [[ -e $filename.$ext ]] ; then
   filename=$filename-$i
 fi
 filename=$filename.$ext
+echo "Writing to filename: $filename"
 
-lein trampoline run -m chicken-coop.core > filename
+lein trampoline run -m chicken-coop.core > $filename
 
