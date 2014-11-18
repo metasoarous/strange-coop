@@ -138,7 +138,7 @@
     (loop [timer timer]
       (Thread/sleep 1000)
       (let [light-level (safe-read! light-ain)]
-        (log "Current light-level:" light-level)
+        (log "Current levels:: light:" light-level "temp:" (safe-read! temp-ain))
         (recur (trans-sm! timer light-level))))))
 
 
