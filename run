@@ -1,3 +1,15 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-lein trampoline run -m chicken-coop.core > "$HOME/data/chickencoop-logs/chicken-coop.`date +'%Y-%m-%d--%H-%M-%S'`.log"
+filename=$HOME/data/chickencoop-logs/chicken-coop
+ext=log
+if [[ -e $filename.$ext ]] ; then
+  i=0
+  while [[ -e $filename-$i.$ext ]] ; do
+    let i++
+  done
+  filename=$filename-$i
+fi
+filename=$filename.$ext
+
+lein trampoline run -m chicken-coop.core > filename
+
