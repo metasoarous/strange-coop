@@ -59,8 +59,8 @@
 
 
 (defn time-sm [state day-fn! night-fn!]
-  (let [dusk 0.08
-        dawn 0.16]
+  (let [dusk 0.04
+        dawn 0.13]
     {:state state
      :trans
         {:day
