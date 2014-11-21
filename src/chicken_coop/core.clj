@@ -73,6 +73,10 @@
         (def status new-status))))
 
 
+(defn max-time-up [max-time start-time]
+  (> (- (System/currentTimeMillis) start-time) max-time))
+
+
 
 (defn close-door! [hb floor-btn roof-btn]
   (log "Initiating close-door! sequence")
@@ -87,27 +91,34 @@
     (lower-with-log)
     (loop [tries 0]
       (cond
+        ; Standard closing procedure
         (closed? floor-btn) (do (log "Stopping door")
-                                (Thread/sleep door-close-wait)
-                                (hb/stop! hb))
-        (and (closed? roof-btn) (tries > n-retries))
+                                (Thread/sleep door-close-wait))
+        ; The final try of the above
+        (and (closed? roof-btn) (> tries n-retries))
                             (do (log "ERROR: Hit roof with max number of retries. Attempting to close without worrying about btn.")
                                 (update-status! :errors)
                                 (hb/reverse! hb)
-                                (Thread/sleep 1000)) ; exit
+                                (Thread/sleep 5000)) ; exit
+        ; The door hit the roof before the floor button triggered; Reverse and try again.
         (closed? roof-btn)  (do (log "WARNING: Hit roof; reeling back in and trying again.")
                                 (update-status! :warnings)
                                 (hb/reverse! hb)
                                 (Thread/sleep 1000) ; make sure door lets go of button
-                                (wait-till (closed? roof-btn)
-                                  (log "Reeling complete; trying again.")
-                                  (lower-with-log))
+                                (loop []
+                                  (when (or (closed? roof-btn)
+                                            (max-time-up max-time-ms start-time))
+                                    (log "Reeling complete; trying again.")
+                                    (lower-with-log)))
                                 (recur (inc tries)))
-        (> (- (System/currentTimeMillis) start-time) max-time-ms)
+        ; After a certain amount of time, just give up
+        (max-time-up max-time-ms start-time)
                             (do (log "ERROR: Maxed out on time; Shutting down.")
-                                (update-status! :errors)
-                                (hb/stop! hb))
-        :else               (recur tries)))))
+                                (update-status! :errors))
+        ; Run the loop again
+        :else               (recur tries)))
+    ; Last thing, make sure to stop once out of loop
+    (hb/stop! hb)))
 
                                 
 
@@ -121,7 +132,7 @@
       (cond
         (closed? roof-btn)
           :pass
-        (> (- (System/currentTimeMillis) start-time) max-time-ms)
+        (max-time-up max-time-ms start-time)
           (do
             (log "ERROR: Unable to shut door.")
             (update-status! :errors))
