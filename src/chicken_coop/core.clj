@@ -105,11 +105,11 @@
                                 (update-status! :warnings)
                                 (hb/reverse! hb)
                                 (Thread/sleep 1000) ; make sure door lets go of button
-                                (loop []
-                                  (when (or (closed? roof-btn)
-                                            (max-time-up max-time-ms start-time))
-                                    (log "Reeling complete; trying again.")
-                                    (lower-with-log)))
+                                (wait-till (or (closed? roof-btn)
+                                               (max-time-up max-time-ms start-time))
+                                  (log "Reeling complete; trying again.")
+                                  (lower-with-log)
+                                  (Thread/sleep 1000)) ; make sure does lets go of button
                                 (recur (inc tries)))
         ; After a certain amount of time, just give up
         (max-time-up max-time-ms start-time)
