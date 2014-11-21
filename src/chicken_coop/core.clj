@@ -43,7 +43,7 @@
 
 (defn toggle!
   [pin]
-  (if (on? pin)
+  (if (off? pin)
     (on! pin)
     (off! pin)))
 
