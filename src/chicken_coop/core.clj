@@ -79,6 +79,7 @@
   (let [door-close-wait 500 ; time to wait after door closes for latches to lock
         n-retries       3
         max-time-secs   120
+        max-time-ms     (* max-time-secs 1000)
         lower-with-log  (fn []
                           (log "Lowering door")
                           (hb/forward! hb))
@@ -102,7 +103,7 @@
                                   (log "Reeling complete; trying again.")
                                   (lower-with-log))
                                 (recur (inc tries)))
-        (> (- (System/currentTimeMillis) start-time) max-time-secs)
+        (> (- (System/currentTimeMillis) start-time) max-time-ms)
                             (do (log "ERROR: Maxed out on time; Shutting down.")
                                 (update-status! :errors)
                                 (hb/stop! hb))
@@ -110,14 +111,23 @@
 
                                 
 
-
 (defn open-door! [hb floor-btn roof-btn]
   (log "Opening door")
-  (hb/reverse! hb)
-  (wait-till (closed? roof-btn)
-    (log "Stopping door")
+  (let [max-time-secs 30
+        max-time-ms   (* max-time-secs 1000)
+        start-time    (System/currentTimeMillis)]
+    (hb/reverse! hb)
+    (loop []
+      (cond
+        (closed? roof-btn)
+          :pass
+        (> (- (System/currentTimeMillis) start-time) max-time-ms)
+          (do
+            (log "ERROR: Unable to shut door.")
+            (update-status! :errors))
+        :else (recur)))
     (hb/stop! hb)))
-
+          
 
 (defn time-sm [state day-fn! night-fn!]
   (let [dusk 0.04
