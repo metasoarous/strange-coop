@@ -141,7 +141,7 @@
           
 
 (defn time-sm [state day-fn! night-fn!]
-  (let [dusk 0.04
+  (let [dusk 0.03
         dawn 0.13]
     {:state state
      :trans
@@ -221,7 +221,7 @@
     (future
       (let [status-patterns {:running  [1500 3000] ; nice steady pulse
                              :warnings [1000 1000]
-                             :errors   [200  800]}
+                             :errors   [100 50 100 750]}
             status-led (gpio :P8 14 :out)]
         (loop []
           (blink-led status-led (status-patterns status))
