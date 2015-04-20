@@ -2,7 +2,7 @@
 
 I have four beautiful chickens, but I live in Seattle and there are lots of evil raccoons that like to eat
 chickens.
-So I used to have to lock them in their coop every night, and let them out early every morning.
+I used to have to lock them in their coop every night, and let them out early every morning.
 This was starting to kill my night life and beauty sleep, so I built a system to automate the task.
 
 I built this system using a BeagleBone Black running this Clojure program to read from a light sensor and
