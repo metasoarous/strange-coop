@@ -1,10 +1,10 @@
-(ns chicken-coop.core
+(ns strange-coop.core
   (:require [clojure.java.io :as io]
             ;[clojure.tools.logging :as log]
             [clojure.tools.trace :as tr]
-            [chicken-coop.util :refer :all]
-            [chicken-coop.bbbpin :as bb :refer :all]
-            [chicken-coop.hbridge :as hb]))
+            [strange-coop.util :refer :all]
+            [strange-coop.bbbpin :as bb :refer :all]
+            [strange-coop.hbridge :as hb]))
 
 
 (defprotocol IButton

@@ -1,4 +1,4 @@
-(ns chicken-coop.util
+(ns strange-coop.util
   (:require [clojure.data.csv :as csv]))
 
 

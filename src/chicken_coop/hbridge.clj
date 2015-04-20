@@ -1,5 +1,5 @@
-(ns chicken-coop.hbridge
-  (:require [chicken-coop.bbbpin :as bb]))
+(ns strange-coop.hbridge
+  (:require [strange-coop.bbbpin :as bb]))
 
 
 (defprotocol HBridgeable
