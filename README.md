@@ -1,16 +1,27 @@
-# chicken-coop
+# A Strange Coop
 
-A Bonejure demo/pilot project!
+I have four beautiful chickens, but I live in Seattle and there are lots of evil raccoons that like to eat
+chickens.
+So I used to have to lock them in their coop every night, and let them out early every morning.
+This was starting to kill my night life and beauty sleep, so I built a system to automate the task.
 
-I have four beautiful chickens, and have to wake up rather early every morning to let them out of their small coop.
-This project is for an automatic, light sensor based automatic door shutter.
-It requires a beaglebone black, and setup of a lein/clojure environment.
+I built this system using a BeagleBone Black running this Clojure program to read from a light sensor and
+control a motor to raise lower the door.
+I'll be giving a presentation on this work at [ClojureWest 2015](http://clojurewest.org), and will link to the video here.
+I'll also likely write up a blog post or two explaining the system in soewhat greater depth, with instructions
+on how to get this set up yourself if you're so inclined.
+
+Also featured in my talk is the introduction of a new Clojure API for hardware programming, called
+[pin-ctrl](https://gitub.com/clj-bots/pin-ctrl).
+I'll be eventually migrating this project to that API, and adding additional features, such as network
+notifications.
+
 
 ## Features
 
 * `./bin/fix_permissions.sh` - Sets up udev rules in `etc` such that the user has permissions to write to GPIO pins and read from AIN pins.
   Also actives AIN functionality on boot, though I wonder if we shouldn't force users to do this themselves.
-* Sysfs based GPIO and AIN implementations, using shared interfaces for `ReadablePin`, etc.
+* Sysfs based GPIO and AIN implementations, using shared protocols for `ReadablePin`, etc.
 * Some abstraction code for working with H-bridges.
 * Automatic `close!`ing of GPIO pins on shutdown hook (requires running with `lein trampoline` however).
 * Specification of pin by physical header/pin pair (like `P8 11`) intead of sysfs pin #.
@@ -26,30 +37,19 @@ On the hardware side, I'm using
 * 2 buttons for detecting when the door is open/shut
 * photoresistor and resistor for sensing light
 * large, 6V battery
+
+Deprecated (wanted to use a battery to power the board, but ran out of voltage too quickly):
 * Low dropout voltage regulator supporting 1.5A at 5V out
 * 2 capacitors for voltage smoothing
 
-Optionally (some in future)
+Optionally:
 * thermocouple, for monitoring temperature
-* wifi, for notifications, etc
-* camera, for monitoring and viz to count chicken laying
+* wifi/network, for notifications, etc (future)
 
-## Usage
-
-TODO: Will be posting more information eventually on how to set up the physical and digital bits.
-
-## Questions
-
-* Should we require users of code to manually run an `activate-ain!` function in order to use ain pins? Or
-  leave this in the fix script to run on BB reboot?
-* What should go under `bonejure.core` versus other namespaces like `bonejure.gpio` or `bonejure.ain`?
-* Should we rewrite the gpio pin code to use the mode7 column for extra robustness?
-* Use future on init! so that we can init a whole bunch of pins at once and not have major lag.
-* Should probably move logic of header/pin to be beaglebone specific.
 
 ## License
 
-Copyright © 2014 Christopher Small
+Copyright © 2015 Christopher Small
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
