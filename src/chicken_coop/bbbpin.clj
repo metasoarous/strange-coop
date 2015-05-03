@@ -1,7 +1,7 @@
-(ns chicken-coop.bbbpin
+(ns strange-coop.bbbpin
   (:require [clojure.java.io :as io]
             [clojure.tools.trace :as tr]
-            [chicken-coop.util :refer :all]))
+            [strange-coop.util :refer :all]))
 
 
 (defn read-pinout-spec [pinout-fn]

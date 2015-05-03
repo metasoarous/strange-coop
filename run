@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-filename=$HOME/data/chickencoop-logs/chicken-coop
+filename=$HOME/data/strange-coop-logs/strange-coop
 ext=log
 if [[ -e $filename.$ext ]] ; then
   i=0
@@ -12,5 +12,5 @@ fi
 filename=$filename.$ext
 echo "Writing to filename: $filename"
 
-lein trampoline run -m chicken-coop.core > $filename
+lein trampoline run -m strange-coop.core > $filename
 

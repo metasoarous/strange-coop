@@ -1,11 +1,11 @@
-(ns chicken-coop.core
+(ns strange-coop.core
   (:require [clojure.java.io :as io]
             ;[clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [clojure.tools.trace :as tr]
-            [chicken-coop.util :refer :all]
-            [chicken-coop.bbbpin :as bb :refer :all]
-            [chicken-coop.hbridge :as hb]))
+            [strange-coop.util :refer :all]
+            [strange-coop.bbbpin :as bb :refer :all]
+            [strange-coop.hbridge :as hb]))
 
 
 (defprotocol IButton
@@ -60,18 +60,19 @@
       (Thread/sleep t))))
 
 
-(def ^:dynamic status :running)
+(defonce status (atom :running))
+
 (defn update-status!
   [new-status]
   (cond
-    (and (= status :warnings) (= new-status :running))
+    (and (= @status :warnings) (= new-status :running))
       (log "WARNING: won't reduce status to :running from warning")
-    (= status :errors)
+    (= @status :errors)
       (log "WARNING: can't change status once :errors")
     :else
       (do
         (log "Changing status to" new-status)
-        (def status new-status))))
+        (reset! status new-status))))
 
 
 (defn max-time-up [max-time start-time]
@@ -230,7 +231,7 @@
                              :errors   [100 50 100 750]}
             status-led (gpio :P8 14 :out)]
         (loop []
-          (blink-led status-led (status-patterns status))
+          (blink-led status-led (status-patterns @status))
           (recur))))
 
     (loop [timer timer]
