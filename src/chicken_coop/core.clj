@@ -1,6 +1,7 @@
 (ns chicken-coop.core
   (:require [clojure.java.io :as io]
             ;[clojure.tools.logging :as log]
+            [com.stuartsierra.component :as component]
             [clojure.tools.trace :as tr]
             [chicken-coop.util :refer :all]
             [chicken-coop.bbbpin :as bb :refer :all]
@@ -204,6 +205,11 @@
 
 
 (defn check [] (println "compiled!"))
+
+
+(defrecord NRepl [config]
+  component/Lifecycle
+  (start [component]
 
 
 (defn -main []

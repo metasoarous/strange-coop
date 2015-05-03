@@ -7,5 +7,7 @@
                  [org.clojure/data.csv "0.1.2"]
                  [org.clojure/tools.logging "0.3.1"]
                  [org.clojure/tools.trace "0.7.8"]
+                 [org.clojure/tools.nrepl "0.2.3"]
+                 [com.stuartsierra/component "0.2.3"]
                  [prismatic/plumbing "0.3.5"]])
 
