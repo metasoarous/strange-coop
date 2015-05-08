@@ -12,7 +12,7 @@ I'll also likely write up a blog post or two explaining the system in soewhat gr
 on how to get this set up yourself if you're so inclined.
 
 Also featured in my talk is the introduction of a new Clojure API for hardware programming, called
-[pin-ctrl](https://gitub.com/clj-bots/pin-ctrl).
+[pin-ctrl](https://github.com/clj-bots/pin-ctrl).
 I'll be eventually migrating this project to that API, and adding additional features, such as network
 notifications.
 
