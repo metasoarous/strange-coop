@@ -208,11 +208,6 @@
 (defn check [] (println "compiled!"))
 
 
-(defrecord NRepl [config]
-  component/Lifecycle
-  (start [component]
-
-
 (defn -main []
   (log "Initializing -main")
   (let [floor-btn (button :P8 11 :normally-off)
