@@ -1,3 +1,6 @@
+Note: this branch points to the code (roughly) as it stood when presented at ClojureWest.
+As I work on a rewrite and additional features, I'll be keeping this branch here for posterity.
+
 # A Strange Coop
 
 I have four beautiful chickens, but I live in Seattle and there are lots of evil raccoons that like to eat
