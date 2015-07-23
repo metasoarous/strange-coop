@@ -179,6 +179,13 @@
   (AIN. pin))
 
 
+(defn toggle!
+  [pin]
+  (if (off? pin)
+    (on! pin)
+    (off! pin)))
+
+
 (setup-shutdown-hook!
   (fn []
     (log "Running shutdown hook")

@@ -17,13 +17,6 @@
        (recur))))
 
 
-(defn toggle!
-  [pin]
-  (if (off? pin)
-    (on! pin)
-    (off! pin)))
-
-
 (defn blink-led
   "Given an led GPIO pin, blink for the given pattern, specified as a single ms value - or vector of such values -
   to wait between led switching"
@@ -31,7 +24,7 @@
   (if (number? pattern)
     (recur led-pin [pattern])
     (doseq [t pattern]
-      (toggle! led-pin)
+      (bb/toggle! led-pin)
       (Thread/sleep t))))
 
 
