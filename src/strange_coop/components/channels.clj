@@ -6,7 +6,7 @@
             [strange-coop.util :refer [log log-tr]]))
 
 
-(defrecord Channels [config channels]
+(defrecord Channels [config]
   component/Lifecycle
   (start [component]
     (log "Initializing channels")
@@ -20,18 +20,18 @@
       (doseq [c [log-chan sat-notif-chan status-led-chan]]
         (async/tap notif-mult c))
       (assoc component
-             :channels
-             {:notify            notif-chan
-              :log               log-chan
-              :satellite-notify  sat-notif-chan
-              :status-led-notify status-led-chan
-              :door              door-chan})))
+             :notify            notif-chan
+             :log               log-chan
+             :satellite-notify  sat-notif-chan
+             :status-led-notify status-led-chan
+             :door              door-chan)))
 
   (stop [component]
     (log "Dropping channels")
-    (doseq [[k c] (:channels component)]
-      (async/close! c))
-    (assoc component :channels nil)))
+    ;; Config is the only attribute that isn't a channel
+    (doseq [k (remove #{:config} (keys component))]
+      (async/close! (get component k))
+      (assoc component k nil))))
 
 
 (defn new-channels
