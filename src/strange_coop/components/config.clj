@@ -69,23 +69,3 @@
    (get-in component (into [:config :config] path) default)))
 
 
-;;; Sketches
-;;; ========
-
-;; Maybe we should just scrap having a separate level for :config... ???
-
-;(defn make-rule
-  ;([name]
-   ;{:name name :path name})
-  ;([name k v & {:as kw-args}]
-   ;(merge (make-rule name) {k v} kw-args)))
-;(def rule make-rule)
-;(defmacro with-merges
-  ;[{:keys [subpath parse]}
-     ;(rule :motor-hb-n-pins
-           ;:path [:motor-hb :n-pins]
-           ;:parse ->long)
-     ;(rule :motor-hb-power-pin
-           ;:path [:motor-hb :power-pin]
-           ;:parse ->long)
-

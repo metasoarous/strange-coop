@@ -1,6 +1,5 @@
 (ns strange-coop.components.satellite
   (:require [clojure.core.async :as async :refer [chan <!! >!! go go-loop >! <! close!]]
-            [org.httpkit.client :as http]
             [strange-coop.components.config :as config]
             [clojure.edn :as edn]
             [gniazdo.core :as ws]
