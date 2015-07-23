@@ -5,33 +5,8 @@
             [clojure.tools.trace :as tr]
             [strange-coop.util :refer :all]
             [strange-coop.bbbpin :as bb :refer :all]
+            [strange-coop.button :as button]
             [strange-coop.hbridge :as hb]))
-
-
-(defprotocol IButton
-  (open? [this])
-  (closed? [this]))
-
-(defrecord NormallyOnButton [gpio-pin]
-  IButton
-  (closed? [_]
-    (off? gpio-pin))
-  (open? [_]
-    (on? gpio-pin)))
-
-(defrecord NormallyOffButton [gpio-pin]
-  IButton
-  (closed? [_]
-    (on? gpio-pin))
-  (open? [_]
-    (off? gpio-pin)))
-
-(defn button [pin-header pin-n direction]
-  (assert (#{:normally-on :normally-off} direction))
-  (let [gpio-pin (gpio pin-header pin-n :in)]
-    (case direction
-      :normally-on (NormallyOnButton. gpio-pin)
-      :normally-off (NormallyOffButton. gpio-pin))))
 
 
 (defmacro wait-till [test & body]
@@ -94,20 +69,20 @@
     (loop [tries 0]
       (cond
         ; Standard closing procedure
-        (closed? floor-btn) (do (log "Stopping door")
+        (button/closed? floor-btn) (do (log "Stopping door")
                                 (Thread/sleep door-close-wait))
         ; The final try of the above
-        (and (closed? roof-btn) (> tries n-retries))
+        (and (button/closed? roof-btn) (> tries n-retries))
                             (do (log "ERROR: Hit roof with max number of retries. Attempting to close without worrying about btn.")
                                 (update-status! :errors)
                                 (hb/reverse! hb)
                                 (Thread/sleep 5000)) ; exit
         ; The door hit the roof before the floor button triggered; Reverse and try again.
-        (closed? roof-btn)  (do (log "WARNING: Hit roof; reeling back in and trying again.")
+        (button/closed? roof-btn)  (do (log "WARNING: Hit roof; reeling back in and trying again.")
                                 (update-status! :warnings)
                                 (hb/reverse! hb)
                                 (Thread/sleep 1000) ; make sure door lets go of button
-                                (wait-till (or (closed? roof-btn)
+                                (wait-till (or (button/closed? roof-btn)
                                                (max-time-up max-time-ms start-time))
                                   (log "Reeling complete; trying again.")
                                   (lower-with-log)
@@ -132,7 +107,7 @@
     (hb/reverse! hb)
     (loop []
       (cond
-        (closed? roof-btn)
+        (button/closed? roof-btn)
           :pass
         (max-time-up max-time-ms start-time)
           (do
@@ -199,8 +174,8 @@
   [floor-btn roof-btn light-ain]
   (log "Initializing state")
   (cond
-    (closed? floor-btn) :night
-    (closed? roof-btn) :day
+    (button/closed? floor-btn) :night
+    (button/closed? roof-btn) :day
     (> (safe-read! light-ain) 0.15) :day
     :else :night))
 
@@ -210,8 +185,8 @@
 
 (defn -main []
   (log "Initializing -main")
-  (let [floor-btn (button :P8 11 :normally-off)
-        roof-btn  (button :P8 12 :normally-on)
+  (let [floor-btn (button/button :P8 11 :normally-off)
+        roof-btn  (button/button :P8 12 :normally-on)
         light-ain (ain 33)
         temp-ain  (ain 35)
         mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
@@ -238,7 +213,7 @@
 
 (defn play []
   (println "ready to initialize")
-  (let [g  (button :P8 11 :normally-off)
+  (let [g  (button/button :P8 11 :normally-off)
         a1 (ain 33)
         a2 (ain 35)]
     (println "initialized successfully")
@@ -246,7 +221,7 @@
       (try
         (println "Reading light" (safe-read! a1))
         (println "Reading temp" (safe-read! a2))
-        (println "Btn closed?" (closed? g))
+        (println "Btn closed?" (button/closed? g))
         (println "")
         (catch Exception e
           (println "Had an exception")
