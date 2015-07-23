@@ -2,85 +2,47 @@
   (:require [clojure.core.async :as async :refer [chan <!! >!! go go-loop >! <! close!]]
             [org.httpkit.client :as http]
             [strange-coop.components.config :as config]
-            [cheshire.core :as json]
+            [clojure.edn :as edn]
+            [gniazdo.core :as ws]
             [com.stuartsierra.component :as component]))
-
-(defn basic-auth
-  [satellite]
-  (mapv (fn [k] (config/get-in-config satellite) [:satellite k]) [:username :password]))
-
-(defn monitor-url
-  ([statellite]
-   (config/get-in-config satellite [:monitor-url]))
-  ([satellite path]
-   (str (monitor-url satellite) path)))
-
-(defn handle-message
-  [satellite {:keys [] :as message}]
-  (http/post (monitor-url satellite "event")
-             {:query-params message
-              :basic-auth (basic-auth satellite)}))
 
 (defn initiate-emit-loop!
   [satellite]
   (go-loop []
-    (when-let [message (<! (get-in-config satellite [:channels :satellite-notify]))]
-      (handle-message satellite message)
+    (when-let [message (<! (get-in satellite [:channels :satellite-notify]))]
+      (ws/send-msg (:socket satellite) (str message))
       (recur))))
 
+(defmulti handle-incoming-message
+  "Handles an incoming message. Warning: satellite passed here is in closer before the socket was added to
+  the event satellite object. So no implementations of this multimethods should try to use (:socket channel)."
+  (fn [satellite message] (:type message))
 
-(defn handle-incoming-message
+(defmethod handle-incoming-message :command
   [satellite message]
-  (
-
-(defn check-messages
-  [satellite]
-  ;; Need to decide on the satellite api
-  (let [message-url (str (get-in-config satellite [:satellite :url]) "messages")
-        ;; Mocky.io
-        ;message-url "http://www.mocky.io/v2/55af3083bf6e05f92366fb35"
-        options  {:timeout 5000
-                  :basic-auth (basic-auth satellite)
-                  :query-params {:since @(:last-check satellite)}}]
-    (go-loop []
-      (http/get message-url
-                options
-                (fn [{:keys [status headers body error]}] ;; asynchronous response handling
-                  (if error
-                    ;; Not sure what to do here
-                    (do (>!! (get-in satellite [:channels :log])
-                             {:type ::check-messages-error
-                              :message "Failed, exception in check-message"
-                              :error error})
-                        (recur))
-                    (do (<!! (:recv-chan satellite) (json/parse-string body true))
-                        )))))
-
-
-(json/parse-string (:body @(http/get "http://www.mocky.io/v2/55af3083bf6e05f92366fb35")) true)
-
-(defn inititate-recv-loop!
-  [satellite]
-  (let [polling-interval 5000]
-    (async/thread
-      (
-    (go-loop []
-      (
-
-(defrecord Satellite [config channels last-check recv-chan]
+  (>!! (-> satellite :channels :door) (:message message)))
+  
+(defrecord Satellite [config channels socket]
   component/Lifecycle
   (start [component]
-    (let [component (assoc component :last-check (atom 0))]
+    (let [log-chan (:log channels)
+          socket (ws/connect
+                   (str "wss://" (get-in config [:satellite :url]) "/socket")
+                   :on-receive (comp (partial handle-incoming-message component) edn/read-string)
+                   :on-connect (fn [_] (>!! log-chan {:type ::info :message "Satellite initialized"}))
+                   ;; Should add reconnect logic...
+                   :on-error (fn [e] (>!! log-chan {:type ::error :message "Satellite error" :error e}))
+                   :on-close (fn [status-code message] (>!! log-chan {:type ::warning
+                                                                    :message (str "Satellite connection closed: " message)
+                                                                    :status-code status-code})))
+          component (assoc component :socket socket)]
       (initiate-emit-loop! component)
-      (initiate-recv-loop! component)
       component))
 
   (stop [component]
-    ;; emit loop will kill automatically because the input channel will close! on channel lifecycle
-    ;; Need a kill siwtch for recv still
-    (assoc component
-           :last-check nil)))
-
+    (ws/close socket)
+    ;; Note that emit loop will close when channels do
+    (assoc component :socket nil)))
 
 (defn new-satellite []
   (map->Satellite {}))
