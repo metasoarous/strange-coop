@@ -1,9 +1,8 @@
 (ns strange-coop.core
   (:require [clojure.java.io :as io]
-            ;[clojure.tools.logging :as log]
             [com.stuartsierra.component :as component]
             [clojure.tools.trace :as tr]
-            [strange-coop.util :refer :all]
+            [strange-coop.util :refer [log log-tr]]
             [strange-coop.bbbpin :as bb :refer :all]
             [strange-coop.button :as button]
             [strange-coop.hbridge :as hb]))
