@@ -1,5 +1,6 @@
 (ns strange-coop.util
-  (:require [clojure.data.csv :as csv]))
+  (:require [clojure.data.csv :as csv]
+            [cemerick.pomegranate :refer [add-dependencies]]))
 
 
 (defn log
@@ -32,4 +33,8 @@
   [f]
   (.addShutdownHook (Runtime/getRuntime) (Thread. f)))
 
+
+(defn load-dep
+  [dep]
+  (add-dependencies :coordinates [dep] :repositories (merge cemerick.pomegranate.aether/maven-central {"clojars" "http://clojars.org/repo"})))
 
