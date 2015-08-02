@@ -34,7 +34,7 @@
       (assoc component k nil))))
 
 
-(defn new-channels
+(defn create-channels
   []
   (map->Channels {}))
 

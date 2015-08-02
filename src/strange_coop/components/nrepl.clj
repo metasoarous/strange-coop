@@ -18,6 +18,6 @@
     (assoc component :nrepl nil)))
 
 
-(defn nrepl []
+(defn create-nrepl []
   (map->NRepl {}))
 

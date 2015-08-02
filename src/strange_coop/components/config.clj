@@ -57,7 +57,7 @@
     (log "Stopping config component")
     (dissoc component :config)))
  
-(defn new-config
+(defn create-config
   [overrides]
   (map->Config {:overrides overrides}))
 
