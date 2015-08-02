@@ -105,7 +105,42 @@
     :else :night))
 
 
-(defn check [] (println "compiled!"))
+(defrecord StateMachine [config channels]
+
+
+
+(def system nil)
+
+(def create-system [config-overrides]
+  (component/system-map
+    :config   (create-config config-overrides)
+    :pins     (component/using (create-pins) [:config])
+    :channels (component/using (create-channels) [:config])
+    :nrepl    (component/using (create-nrepl) [:config])))
+
+(defn start
+  ([config-overrides]
+   (when-not system
+     (alter-var-root #'system (constantly (create-system config-overrides))))
+   (alter-var-root #'system component/start))
+  ([] (start {})))
+
+
+(defn stop
+  []
+  (alter-var-root #'system component/stop))
+
+(defn restart
+  "Restart (stop then start) the system with whatever configurations were running in the previous
+  system, except for overrides as specified by the optional config-overrides arg (works by calling
+  deep-merge on the current config or {} if none with config-overrides, and passing that as
+  config-overrides to the config component)."
+  ([config-overrides]
+   (let [current-config (or (:config (:config system)) {})
+         new-config-overrides (config/deep-merge current-config config-overrides)]
+     (stop)
+     (start new-config-overrides)))
+  ([] (restart {})))
 
 
 (defn -main []
@@ -134,23 +169,5 @@
       (let [light-level (safe-read! light-ain)]
         (log "Current levels:: light:" light-level "temp:" (safe-read! temp-ain))
         (recur (trans-sm! timer light-level))))))
-
-
-(defn play []
-  (println "ready to initialize")
-  (let [g  (button/button :P8 11 :normally-off)
-        a1 (ain 33)
-        a2 (ain 35)]
-    (println "initialized successfully")
-    (doseq [_ (range)]
-      (try
-        (println "Reading light" (safe-read! a1))
-        (println "Reading temp" (safe-read! a2))
-        (println "Btn closed?" (button/closed? g))
-        (println "")
-        (catch Exception e
-          (println "Had an exception")
-          (println e)))
-      (Thread/sleep 1000))))
 
 
