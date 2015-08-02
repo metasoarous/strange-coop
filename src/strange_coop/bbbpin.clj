@@ -1,7 +1,7 @@
 (ns strange-coop.bbbpin
   (:require [clojure.java.io :as io]
             [clojure.tools.trace :as tr]
-            [strange-coop.util :refer :all]))
+            [strange-coop.util :as util :refer :all]))
 
 
 (defn read-pinout-spec [pinout-fn]
@@ -155,13 +155,11 @@
     (write! p bit)))
 
 
-
 ;; AIN specific stuff
 
 (defn get-ain-from-pin [pin]
   (:name
     ((pinout-spec*) [:P9 pin])))
-
 
 ; AIN pins are all on :P9, so specifying header is useless
 (defrecord AIN [pin]
@@ -174,17 +172,14 @@
       (safe-int)
       (* (/ 1 1800.0)))))
 
-
 (defn ain [pin]
   (AIN. pin))
-
 
 (defn toggle!
   [pin]
   (if (off? pin)
     (on! pin)
     (off! pin)))
-
 
 (setup-shutdown-hook!
   (fn []
@@ -196,5 +191,10 @@
         (catch Exception e
           (log "Problems closing pin" k)
           (.printStackTrace e))))))
+
+(defn safe-read!
+  [a]
+  (util/try-times 50 "Failed to read pin"
+    (read! a)))
 
 

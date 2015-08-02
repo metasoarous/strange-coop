@@ -8,12 +8,6 @@
             [strange-coop.hbridge :as hb]))
 
 
-(defmacro wait-till [test & body]
-  `(loop []
-     (if ~test
-       (do
-         ~@body)
-       (recur))))
 
 
 (defn blink-led
@@ -74,41 +68,6 @@
     (((:trans sm) (:state sm)) m)))
 
 
-(defmacro try-times
-  [i message & body]
-  `(loop [i# ~i]
-     (let [result#
-             (when (> i# 0)
-               (try
-                 ~@body
-                 (catch Exception e#
-                   (println ~message ":" e#)
-                   ::failed)))]
-       (if (= result# ::failed)
-         (recur (dec i#))
-         result#))))
-
-
-(defn safe-read!
-  [a]
-  (try-times 50 "Failed to read pin"
-    (read! a)))
-
-
-(defn init-state!
-  [floor-btn roof-btn light-ain]
-  (log "Initializing state")
-  (cond
-    (button/closed? floor-btn) :night
-    (button/closed? roof-btn) :day
-    (> (safe-read! light-ain) 0.15) :day
-    :else :night))
-
-
-(defrecord StateMachine [config channels]
-
-
-
 (def system nil)
 
 (def create-system [config-overrides]
@@ -122,6 +81,7 @@
   ([config-overrides]
    (when-not system
      (alter-var-root #'system (constantly (create-system config-overrides))))
+   ;; Should we add the shutdown hook here?
    (alter-var-root #'system component/start))
   ([] (start {})))
 

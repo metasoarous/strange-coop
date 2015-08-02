@@ -12,12 +12,10 @@
   (>!! (-> component :channels :notify)
        {:type level :time (System/currentTimeMillis) :message message}))
 
-
 (defn log-tr
   [& args]
   (log args)
   (last args))
-
 
 (defn safe-int [x]
   (try
@@ -32,18 +30,29 @@
          ~@body)
        (recur))))
 
+(defmacro try-times
+  [i message & body]
+  `(loop [i# ~i]
+     (let [result#
+             (when (> i# 0)
+               (try
+                 ~@body
+                 (catch Exception e#
+                   (println ~message ":" e#)
+                   ::failed)))]
+       (if (= result# ::failed)
+         (recur (dec i#))
+         result#))))
+
 (defn read-csv-row [row]
   (first (csv/read-csv row)))
-
 
 (defn kw->str [kw]
   (clojure.string/replace (str kw) ":" ""))
 
-
 (defn setup-shutdown-hook!
   [f]
   (.addShutdownHook (Runtime/getRuntime) (Thread. f)))
-
 
 (defn load-dep
   [dep]
