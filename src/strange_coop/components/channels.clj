@@ -6,7 +6,10 @@
             [strange-coop.util :refer [log log-tr]]))
 
 
-(defrecord Channels [config]
+(defrecord Channels
+  "This is the grand central dispatch of the application, if you will.
+  Notification messages should be {:type :message}"
+  [config]
   component/Lifecycle
   (start [component]
     (log "Initializing channels")

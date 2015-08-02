@@ -1,11 +1,16 @@
 (ns strange-coop.util
   (:require [clojure.data.csv :as csv]
+            [clojure.core.async :as async :refer [>!! <!!]]
             [cemerick.pomegranate :refer [add-dependencies]]))
-
 
 (defn log
   [& args]
   (apply println "LOG" (int (/ (System/currentTimeMillis) 1000)) ":" args))
+
+(defn notify
+  [component level message]
+  (>!! (-> component :channels :notify)
+       {:type level :time (System/currentTimeMillis) :message message}))
 
 
 (defn log-tr
@@ -20,6 +25,12 @@
     (catch Exception e
       x)))
 
+(defmacro wait-till [test & body]
+  `(loop []
+     (if ~test
+       (do
+         ~@body)
+       (recur))))
 
 (defn read-csv-row [row]
   (first (csv/read-csv row)))
