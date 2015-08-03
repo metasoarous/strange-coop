@@ -15,7 +15,7 @@
 (defmulti handle-incoming-message
   "Handles an incoming message. Warning: satellite passed here is in closer before the socket was added to
   the event satellite object. So no implementations of this multimethods should try to use (:socket channel)."
-  (fn [satellite message] (:type message))
+  (fn [satellite message] (:type message)))
 
 (defmethod handle-incoming-message :command
   [satellite message]
@@ -43,7 +43,7 @@
     ;; Note that emit loop will close when channels do
     (assoc component :socket nil)))
 
-(defn new-satellite []
+(defn create-satellite []
   (map->Satellite {}))
 
 

@@ -27,6 +27,10 @@
     component))
 
 
+(defn create-door []
+  (map->Door {}))
+
+
 (defn- max-time-up? [max-time start-time]
   (> (- (System/currentTimeMillis) start-time) max-time))
 

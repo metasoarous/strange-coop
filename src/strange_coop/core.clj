@@ -5,9 +5,14 @@
             [strange-coop.util :refer [log log-tr]]
             [strange-coop.bbbpin :as bb :refer :all]
             [strange-coop.button :as button]
-            [strange-coop.hbridge :as hb]))
-
-
+            [strange-coop.hbridge :as hb]
+            [strange-coop.components [config :as config :refer [create-config]]
+                                     [channels :refer [create-channels]]
+                                     [door :refer [create-door]]
+                                     [light-monitor :refer [create-light-monitor]]
+                                     [nrepl :refer [create-nrepl]]
+                                     [pins :refer [create-pins]]
+                                     [satellite :refer [create-satellite]]]))
 
 
 (defn blink-led
@@ -35,47 +40,25 @@
         (log "Changing status to" new-status)
         (reset! status new-status))))
 
-
-(defn time-sm [state day-fn! night-fn!]
-  (let [dusk 0.03
-        dawn 0.13]
-    {:state state
-     :trans
-        {:day
-            (fn [brightness]
-              (if (< brightness dusk)
-                ; state side effects
-                (do
-                  (log "Switching from day to night and running evening routine")
-                  (night-fn!)
-                  :night)
-                ; Don't change anything
-                :day))
-         :night
-            (fn [brightness]
-              (if (> brightness dawn)
-                ; state side effects
-                (do
-                  (log "Switching from night to day and running morning routine")
-                  (day-fn!)
-                  :day)
-                ; Don't change anything
-                :night))}}))
-
-
-(defn trans-sm! [sm m]
-  (assoc sm :state
-    (((:trans sm) (:state sm)) m)))
-
+      ;(let [status-patterns {:running  [1500 3000] ; nice steady pulse
+                             ;:warnings [1000 1000]
+                             ;:errors   [100 50 100 750]}
+            ;status-led (gpio :P8 14 :out)]
+        ;(loop []
+          ;(blink-led status-led (status-patterns @status))
+          ;(recur))))
 
 (def system nil)
 
-(def create-system [config-overrides]
+(defn create-system [config-overrides]
   (component/system-map
-    :config   (create-config config-overrides)
-    :pins     (component/using (create-pins) [:config])
-    :channels (component/using (create-channels) [:config])
-    :nrepl    (component/using (create-nrepl) [:config])))
+    :config        (create-config config-overrides)
+    :channels      (component/using (create-channels)      [:config])
+    :pins          (component/using (create-pins)          [:config])
+    :door          (component/using (create-door)          [:config :channels :pins])
+    :light-monitor (component/using (create-light-monitor) [:config :channels :pins])
+    :satellite     (component/using (create-satellite)     [:config :channels])
+    :nrepl         (component/using (create-nrepl)         [:config])))
 
 (defn start
   ([config-overrides]
@@ -105,29 +88,6 @@
 
 (defn -main []
   (log "Initializing -main")
-  (let [floor-btn (button/button :P8 11 :normally-off)
-        roof-btn  (button/button :P8 12 :normally-on)
-        light-ain (ain 33)
-        temp-ain  (ain 35)
-        mtr-ctrl  (hb/hbridge [16 17 18] :header :P8)
-        timer     (time-sm
-                    (log-tr "Initial time state:" (init-state! floor-btn roof-btn light-ain))
-                    (partial open-door! mtr-ctrl floor-btn roof-btn)
-                    (partial close-door! mtr-ctrl floor-btn roof-btn))]
-
-    (future
-      (let [status-patterns {:running  [1500 3000] ; nice steady pulse
-                             :warnings [1000 1000]
-                             :errors   [100 50 100 750]}
-            status-led (gpio :P8 14 :out)]
-        (loop []
-          (blink-led status-led (status-patterns @status))
-          (recur))))
-
-    (loop [timer timer]
-      (Thread/sleep 1000)
-      (let [light-level (safe-read! light-ain)]
-        (log "Current levels:: light:" light-level "temp:" (safe-read! temp-ain))
-        (recur (trans-sm! timer light-level))))))
+  (start {}))
 
 

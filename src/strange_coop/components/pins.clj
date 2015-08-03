@@ -1,4 +1,4 @@
-(ns strange-coop.components.notifier
+(ns strange-coop.components.pins
   (:require [clojure.core.async :as async :refer [chan <!! >!! go go-loop >! <! close!]]
             [com.stuartsierra.component :as component]
             [strange-coop.bbbpin :as bb]

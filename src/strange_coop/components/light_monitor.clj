@@ -64,7 +64,7 @@
                   (partial >! (:door channels) :close))]
         (let [[message _] (async/alts! [kill-chan (async/timeout polling-interval)])]
           (if-not (= message :kill)
-            (let [light-level (bb/read! light-sensor)]
+            (let [light-level (bb/safe-read! light-sensor)]
               (notify ::measurement {:light-level light-level})
               (recur (trans-sm! light-state-machine light-level)))
             (notify ::info "LightMonitor recieved kill signal; ending polling loop.")))))
