@@ -16,16 +16,20 @@
 
 (def defaults
   {:nrepl-port 9999
-   :satellite {:url "http://localhost:3000/"}
+   :satellite {:url "http://localhost:3000/"
+               :credentials {:username "fuckshit" :password "stack"}}
    :channels {:buffer-size 100}
    :day-state-machine {:day-threshold   0.13
                        :night-threshold 0.03}
    :pins  {:motor-hb     {:pins   [16 17 18]
-                          :header :P8}}
+                          :header :P8}
            :light-sensor [:P9 33]
            :temp-sensor  [:P9 35]
            :floor-button [:P8 11 :normally-off]
-           :roof-button  [:P8 12 :normally-on]})
+           :roof-button  [:P8 12 :normally-on]}
+   :status-led {:status-patterns {:running  [1500 3000]
+                                  :warnings [1000 1000]
+                                  :errors   [100 50 100 750]}}})
 
 (defn ->long [x]
   (Long/parseLong x))
