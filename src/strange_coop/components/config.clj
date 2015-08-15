@@ -45,7 +45,9 @@
 (defn get-environ-config [rules env]
   (reduce
     (fn [config [name {:keys [parse path]}]]
-      (assoc-in config (or path [name]) ((or parse identity) (get env name))))
+      (if-let [env-var-val (get env name)]
+        (assoc-in config (or path [name]) ((or parse identity) env-var-val))
+        config))
     {}
     rules))
 
