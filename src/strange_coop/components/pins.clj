@@ -16,7 +16,9 @@
            :roof-button   (button/button :P8 12 :normally-on)
            :light-sensor  (bb/ain 33)
            :temp-sensor   (bb/ain 35)
-           :motor-control (hb/hbridge [16 17 18] :header :P8)))
+           :motor-control (hb/hbridge [16 17 18] :header :P8)
+           :status-led    (bb/gpio :P8 14 :out)))
+
   (stop [component]
     (apply dissoc component pin-keys)))
 
