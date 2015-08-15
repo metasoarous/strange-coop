@@ -1,11 +1,6 @@
 (ns strange-coop.core
-  (:require [clojure.java.io :as io]
-            [com.stuartsierra.component :as component]
-            [clojure.tools.trace :as tr]
-            [strange-coop.util :refer [log log-tr]]
-            [strange-coop.bbbpin :as bb :refer :all]
-            [strange-coop.button :as button]
-            [strange-coop.hbridge :as hb]
+  (:require [com.stuartsierra.component :as component]
+            [strange-coop.util :as util]
             [strange-coop.components [config :as config :refer [create-config]]
                                      [channels :refer [create-channels]]
                                      [door :refer [create-door]]
@@ -14,39 +9,6 @@
                                      [pins :refer [create-pins]]
                                      [satellite :refer [create-satellite]]]))
 
-
-(defn blink-led
-  "Given an led GPIO pin, blink for the given pattern, specified as a single ms value - or vector of such values -
-  to wait between led switching"
-  [led-pin pattern]
-  (if (number? pattern)
-    (recur led-pin [pattern])
-    (doseq [t pattern]
-      (bb/toggle! led-pin)
-      (Thread/sleep t))))
-
-
-(defonce status (atom :running))
-
-(defn update-status!
-  [new-status]
-  (cond
-    (and (= @status :warnings) (= new-status :running))
-      (log "WARNING: won't reduce status to :running from warning")
-    (= @status :errors)
-      (log "WARNING: can't change status once :errors")
-    :else
-      (do
-        (log "Changing status to" new-status)
-        (reset! status new-status))))
-
-      ;(let [status-patterns {:running  [1500 3000] ; nice steady pulse
-                             ;:warnings [1000 1000]
-                             ;:errors   [100 50 100 750]}
-            ;status-led (gpio :P8 14 :out)]
-        ;(loop []
-          ;(blink-led status-led (status-patterns @status))
-          ;(recur))))
 
 (def system nil)
 
@@ -87,7 +49,7 @@
 
 
 (defn -main []
-  (log "Initializing -main")
+  (util/log "Initializing -main")
   (start {}))
 
 
