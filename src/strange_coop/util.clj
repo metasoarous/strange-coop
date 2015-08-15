@@ -58,3 +58,7 @@
   [dep]
   (add-dependencies :coordinates [dep] :repositories (merge cemerick.pomegranate.aether/maven-central {"clojars" "http://clojars.org/repo"})))
 
+(defn dequalify-keyword
+  [kw]
+  (-> :this/that str (clojure.string/split #"\/") last keyword))
+
