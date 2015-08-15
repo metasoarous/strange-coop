@@ -1,7 +1,6 @@
 (ns strange-coop.util
   (:require [clojure.data.csv :as csv]
-            [clojure.core.async :as async :refer [>!! <!!]]
-            [cemerick.pomegranate :refer [add-dependencies]]))
+            [clojure.core.async :as async :refer [>!! <!!]]))
 
 (defn log
   [& args]
@@ -54,11 +53,15 @@
   [f]
   (.addShutdownHook (Runtime/getRuntime) (Thread. f)))
 
-(defn load-dep
-  [dep]
-  (add-dependencies :coordinates [dep] :repositories (merge cemerick.pomegranate.aether/maven-central {"clojars" "http://clojars.org/repo"})))
-
 (defn dequalify-keyword
   [kw]
   (-> :this/that str (clojure.string/split #"\/") last keyword))
+
+(comment
+  ;; for dev only
+  (require '[cemerick.pomegranate :refer [add-dependencies]])
+  (defn load-dep
+    [dep]
+    (add-dependencies :coordinates [dep] :repositories (merge cemerick.pomegranate.aether/maven-central {"clojars" "http://clojars.org/repo"})))
+  )
 
