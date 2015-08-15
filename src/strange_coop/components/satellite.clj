@@ -1,9 +1,16 @@
 (ns strange-coop.components.satellite
   (:require [clojure.core.async :as async :refer [chan <!! >!! go go-loop >! <! close!]]
-            [strange-coop.components.config :as config]
+            [strange-coop.components.config :as config :refer [get-in-config]]
             [clojure.edn :as edn]
             [gniazdo.core :as ws]
+            [base64-clj.core :as base64]
             [com.stuartsierra.component :as component]))
+
+
+(defn basic-auth
+  [component]
+  (let [{:keys [username password]} (get-in-config component [:satellite :credentials])]
+    (str "Basic " (base64/encode (str username ":" password)))))
 
 (defn initiate-emit-loop!
   [satellite]
@@ -27,6 +34,7 @@
     (let [log-chan (:log channels)
           socket (ws/connect
                    (str "wss://" (get-in config [:satellite :url]) "/socket")
+                   :headers {"Authorization" (basic-auth component)}
                    :on-receive (comp (partial handle-incoming-message component) edn/read-string)
                    :on-connect (fn [_] (>!! log-chan {:type ::info :message "Satellite initialized"}))
                    ;; Should add reconnect logic...
