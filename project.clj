@@ -11,6 +11,7 @@
                  [org.clojure/tools.nrepl "0.2.3"]
                  [com.stuartsierra/component "0.2.3"]
                  [stylefruits/gniazdo "0.4.0"]
+                 [org.clojure/tools.namespace "0.2.11"]
                  [base64-clj "0.1.1"]
                  [environ "1.0.0"]
                  [cheshire "5.5.0"]
