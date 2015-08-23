@@ -3,6 +3,8 @@
             [clojure.tools.trace :as tr]
             [strange-coop.util :as util :refer :all]))
 
+(def ^:dynamic *mock?* false)
+
 
 (defn read-pinout-spec [pinout-fn]
   (println "about to read pinout spec")
@@ -117,13 +119,31 @@
        (str "/sys/class/gpio/gpio" (get-gpio-n header pin) "/value")))))
 
 
+(defrecord MockGPIO [header pin direction]
+  InitablePin
+  (init! [this] this)
+  (close! [this] this)
+  WriteablePin
+  (write! [this value]
+    {:pre [(#{:on :off} direction)]}
+    (reset! (:value this) assoc value)
+    value)
+  ReadablePin
+  (read! [this]
+    @(:value this)))
+
+(defn mock-gpio [header pin direction]
+  (assoc (MockGPIO. header pin direction) :value (atom :off)))
+
 (defn gpio [header pin direction]
   {:pre [(integer? pin) ; should make sure valid pin
          (#{:P8 :P9} header)
          (#{:in :out :high :low} direction)]}
-  (let [g (GPIO. header pin direction)]
-    (init! g)
-    g))
+  (if *mock?*
+    (mock-gpio header pin direction)
+    (let [g (GPIO. header pin direction)]
+      (init! g)
+      g))
 
 
 (defn on? [gp]
@@ -172,8 +192,24 @@
       (safe-int)
       (* (/ 1 1800.0)))))
 
+(defrecord MockAIN [pin]
+  ReadablePin
+  (read! [this]
+    @(:value this)))
+
+(defn set-mock-val!
+  [mock-ain new-value]
+  (reset! (:value mock-ain) value)
+  mock-ain)
+
+(defn mock-ain [pin]
+  (assoc (MockAIN. pin) :value (atom 0)))
+
 (defn ain [pin]
-  (AIN. pin))
+  (if *mock?*
+    (mock-ain pin)
+    (AIN. pin)))
+
 
 (defn toggle!
   [pin]
