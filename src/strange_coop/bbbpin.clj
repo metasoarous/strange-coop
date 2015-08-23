@@ -143,7 +143,7 @@
     (mock-gpio header pin direction)
     (let [g (GPIO. header pin direction)]
       (init! g)
-      g))
+      g)))
 
 
 (defn on? [gp]
@@ -199,7 +199,7 @@
 
 (defn set-mock-val!
   [mock-ain new-value]
-  (reset! (:value mock-ain) value)
+  (reset! (:value mock-ain) new-value)
   mock-ain)
 
 (defn mock-ain [pin]
