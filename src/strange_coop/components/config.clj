@@ -6,7 +6,7 @@
 (defn deep-merge
   "Like merge, but merges maps recursively."
   [& maps]
-  (if (every? map? maps)
+  (if (every? #(or (map? %) (nil? %)) maps)
     (apply merge-with deep-merge maps)
     (last maps)))
 
