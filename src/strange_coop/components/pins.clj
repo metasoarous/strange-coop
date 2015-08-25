@@ -4,6 +4,7 @@
             [strange-coop.bbbpin :as bb]
             [strange-coop.components.config :as config]
             [strange-coop.button :as button]
+            [strange-coop.util :as util :refer [log]]
             [strange-coop.hbridge :as hb]))
 
 
@@ -12,6 +13,7 @@
 (defrecord Pins [config]
   component/Lifecycle
   (start [component]
+    (log "Starting pins")
     (with-bindings {#'bb/*mock?* (config/get-in-config component [:mock])}
       (assoc component
              :floor-button  (button/button :P8 11 :normally-off)
@@ -22,6 +24,7 @@
              :status-led    (bb/gpio :P8 14 :out))))
 
   (stop [component]
+    (log "Stopping pins")
     (apply dissoc component pin-keys)))
 
 (defn create-pins []

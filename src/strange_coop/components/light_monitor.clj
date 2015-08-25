@@ -52,6 +52,7 @@
 (defrecord LightMonitor [config channels pins kill-chan]
   component/Lifecycle
   (start [component]
+    (log "Starting light monitor")
     (let [{:keys [floor-button roof-button light-sensor]} pins
           kill-chan (chan)
           ;; should hook up to config
@@ -67,10 +68,11 @@
             (let [light-level (bb/safe-read! light-sensor)]
               (notify component ::measurement {:light-level light-level})
               (recur (trans-sm! light-state-machine light-level)))
-            (notify component ::info "LightMonitor recieved kill signal; ending polling loop.")))))
-    (assoc component :kill-chan kill-chan))
+            (notify component ::info "LightMonitor recieved kill signal; ending polling loop."))))
+      (assoc component :kill-chan kill-chan)))
 
   (stop [component]
+    (log "Stopping light monitor")
     (>!! kill-chan :kill)
     (async/close! kill-chan)
     (dissoc component :kill-chan)))

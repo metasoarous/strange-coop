@@ -8,13 +8,24 @@
   component/Lifecycle
   (start [component]
     (log "Starting nrepl")
-    (let [port   (get-in config [:config :nrepl-port] 1818)
-          server (nrepl-server/start-server :port port)]
-      (assoc component :nrepl server)))
+    (try
+      (let [port   (get-in config [:config :nrepl-port] 1818)
+            server (nrepl-server/start-server :port port)]
+        (assoc component :nrepl server))
+      (catch Exception e
+        (log "ERROR: Failed to start nrepl")
+        (.printStackTrace e)
+        component)))
 
   (stop [component]
     (log "Stopping nrepl")
-    (nrepl-server/stop-server (:nrepl component))
+    (if-let [nrepl (:nrepl component)]
+      (try
+        (nrepl-server/stop-server (:nrepl component))
+        (catch Exception e
+          (log "ERROR: Failed to stop nrepl")
+          (.printStackTrace e)))
+      (log "(no-op; no nrepl running...)"))
     (assoc component :nrepl nil)))
 
 

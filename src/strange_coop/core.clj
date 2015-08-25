@@ -10,7 +10,7 @@
                                      [satellite :refer [create-satellite]]]))
 
 
-(def system nil)
+(defonce system nil)
 
 (defn create-system [config-overrides]
   (component/system-map

@@ -61,7 +61,7 @@
                    overrides))
   (stop [component]
     (log "Stopping config component")
-    (dissoc component :config)))
+    (assoc component :config nil)))
  
 (defn create-config
   [overrides]

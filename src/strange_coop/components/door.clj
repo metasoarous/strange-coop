@@ -16,6 +16,7 @@
 (defrecord Door [config pins channels]
   component/Lifecycle
   (start [component]
+    (log "Starting door")
     (go-loop []
       (when-let [message (<! (:door channels))]
         (handle-message component message)
@@ -23,6 +24,7 @@
     component)
 
   (stop [component]
+    (log "Stopping door")
     ;; We could still kill the chan here, but is this the right place to control that?
     component))
 

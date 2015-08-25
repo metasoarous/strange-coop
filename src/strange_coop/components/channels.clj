@@ -33,9 +33,12 @@
   (stop [component]
     (log "Dropping channels")
     ;; Config is the only attribute that isn't a channel
-    (doseq [k (remove #{:config} (keys component))]
-      (async/close! (get component k))
-      (assoc component k nil))))
+    (reduce
+      (fn [component k]
+        (async/close! (get component k))
+        (assoc component k nil))
+      component
+      (remove #{:config} (keys component)))))
 
 
 (defn create-channels

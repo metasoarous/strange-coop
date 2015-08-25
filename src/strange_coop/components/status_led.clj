@@ -43,6 +43,7 @@
 (defrecord StatusLed [config channels pins status]
   component/Lifecycle
   (start [component]
+    (log "Starting status led")
     (let [status (atom :running)
           component (assoc component :status status)]
       (initialize-status-monitoring! component)
@@ -51,6 +52,7 @@
       component))
                
   (stop [component]
+    (log "Stopping status led")
     ;; This will trigger a kill on the status led loop, and make sure led is off
     (reset! status nil)
     (bb/off! (:status-led pins))))
