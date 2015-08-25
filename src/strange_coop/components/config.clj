@@ -17,7 +17,7 @@
 (def defaults
   {:nrepl-port 9999
    :satellite {:url "http://localhost:3000/"
-               :credentials {:username "fuckshit" :password "stack"}}
+               :credentials {:username "bobjones" :password "xyz"}}
    :channels {:buffer-size 100}
    :day-state-machine {:day-threshold   0.13
                        :night-threshold 0.03}
