@@ -126,7 +126,7 @@
   WriteablePin
   (write! [this value]
     {:pre [(#{:on :off} direction)]}
-    (reset! (:value this) assoc value)
+    (reset! (:value this) value)
     value)
   ReadablePin
   (read! [this]
