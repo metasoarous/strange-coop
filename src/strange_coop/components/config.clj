@@ -39,8 +39,7 @@
   {:nrepl-port         {:parse ->long}
    :satellite-url      {:path [:satellite :url]}
    :satellite-username {:path [:satellite :username]}
-   :satellite-password {:path [:satellite :password]}
-   })
+   :satellite-password {:path [:satellite :password]}})
 
 (defn get-environ-config [rules env]
   (reduce
